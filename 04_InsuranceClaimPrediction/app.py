@@ -38,7 +38,7 @@ with col1:
     children = st.number_input("Number of Children", min_value=0, max_value=10, value=1)
 
 with col2:
-    sex = st.selectbox("Sex", ["male", "female"])
+    sex = st.selectbox("Gender", ["male", "female"])
     smoker = st.selectbox("Smoker", ["yes", "no"])
     region = st.selectbox("Region", ["northeast", "northwest", "southeast", "southwest"])
 
@@ -63,4 +63,4 @@ if st.button("🚀 Predict"):
 
 # Optional footer
 st.markdown("---")
-st.markdown("Made with ❤️ by [Ashna Imtiaz](#) • Data Science Internship Project")
+st.markdown("© 2025 Ashna Imtiaz • Data Science Internship Project")
