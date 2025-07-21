@@ -97,7 +97,3 @@ joblib
 numpy
 pandas
 ```
-
----
-
-Let me know if you'd like a short `requirements.txt` or to add a results visualization section.
