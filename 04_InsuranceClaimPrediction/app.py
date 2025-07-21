@@ -5,7 +5,7 @@ import os
 import streamlit as st
 
 # Load model
-model_path = os.path.join("models", "final_model.pkl")
+model_path = os.path.join("models", "model.pkl")
 model = joblib.load(model_path)
 
 # Expected columns (from training)
