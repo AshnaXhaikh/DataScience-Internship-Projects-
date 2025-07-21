@@ -1,53 +1,66 @@
+import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
 import os
-import streamlit as st
+import joblib
 
-# Safe path to model file
+# Load model safely
 model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
 model = joblib.load(model_path)
-# Expected columns (from training)
-expected_cols = ['age', 'bmi', 'children',
-                 'sex_male', 'smoker_yes',
-                 'region_northwest', 'region_southeast', 'region_southwest']
 
-def preprocess_input(input_df):
-    # One-hot encode input
-    input_encoded = pd.get_dummies(input_df, columns=['sex', 'smoker', 'region'], drop_first=True, dtype=int)
+# App title and description
+st.set_page_config(page_title="Insurance Claim Predictor", layout="centered")
 
-    # Ensure all expected columns are present
-    for col in expected_cols:
-        if col not in input_encoded.columns:
-            input_encoded[col] = 0  # Add missing col as 0
+st.title("🩺 Insurance Claim Prediction App")
+st.markdown("""
+Welcome! This app uses a trained Lasso Regression model to predict **insurance charges** based on user details.  
+Fill in the details below and click **Predict** to get the result.
+""")
 
-    # Reorder columns
-    input_encoded = input_encoded[expected_cols]
-    return input_encoded
+# Sidebar
+st.sidebar.header("ℹ️ About")
+st.sidebar.markdown("""
+This project was part of a data science internship.  
+I used feature engineering, encoding, and regularized regression to build the model.
 
-# Streamlit UI
-st.title("Medical Insurance Cost Predictor")
+**Tech Stack:** Python, Scikit-learn, Streamlit  
+**Created by:** Ashna Imtiaz
+""")
 
-age = st.number_input("Age", 18, 100)
-bmi = st.number_input("BMI", 10.0, 60.0)
-children = st.number_input("Number of Children", 0, 10)
-sex = st.selectbox("Sex", ["female", "male"])
-smoker = st.selectbox("Smoker", ["no", "yes"])
-region = st.selectbox("Region", ["northeast", "northwest", "southeast", "southwest"])
+# Input form
+st.subheader("Enter your details:")
 
-if st.button("Predict"):
-    # Prepare input
-    input_dict = {
-        'age': [age],
-        'bmi': [bmi],
-        'children': [children],
-        'sex': [sex],
-        'smoker': [smoker],
-        'region': [region]
-    }
-    input_df = pd.DataFrame(input_dict)
-    input_processed = preprocess_input(input_df)
+col1, col2 = st.columns(2)
 
-    # Predict
-    prediction = model.predict(input_processed)[0]
-    st.success(f"Predicted Insurance Cost: ${prediction:,.2f}")
+with col1:
+    age = st.slider("Age", 18, 100, 30)
+    bmi = st.slider("BMI (Body Mass Index)", 10.0, 50.0, 25.0)
+    children = st.number_input("Number of Children", min_value=0, max_value=10, value=1)
+
+with col2:
+    sex = st.selectbox("Sex", ["male", "female"])
+    smoker = st.selectbox("Smoker", ["yes", "no"])
+    region = st.selectbox("Region", ["northeast", "northwest", "southeast", "southwest"])
+
+# Convert inputs to DataFrame
+input_data = {
+    'age': [age],
+    'bmi': [bmi],
+    'children': [children],
+    'sex_male': [1 if sex == 'male' else 0],
+    'smoker_yes': [1 if smoker == 'yes' else 0],
+    'region_northwest': [1 if region == 'northwest' else 0],
+    'region_southeast': [1 if region == 'southeast' else 0],
+    'region_southwest': [1 if region == 'southwest' else 0]
+}
+
+input_df = pd.DataFrame(input_data)
+
+# Predict button
+if st.button("🚀 Predict"):
+    prediction = model.predict(input_df)[0]
+    st.success(f"💰 Estimated Insurance Charges: **${prediction:,.2f}**")
+
+# Optional footer
+st.markdown("---")
+st.markdown("Made with ❤️ by [Ashna Imtiaz](#) • Data Science Internship Project")
