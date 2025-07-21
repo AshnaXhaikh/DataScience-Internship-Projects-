@@ -1,41 +1,54 @@
-import streamlit as st
-import numpy as np
 import pandas as pd
+import numpy as np
 import joblib
 import os
+import streamlit as st
 
-# Safely load the model from current directory
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "model.pkl")
-model = joblib.load(MODEL_PATH)
+# Load model
+model_path = os.path.join("models", "final_model.pkl")
+model = joblib.load(model_path)
 
-# App title
-st.title("🩺 Medical Insurance Cost Prediction App")
-st.write("Predict the expected medical insurance charges based on input features.")
+# Expected columns (from training)
+expected_cols = ['age', 'bmi', 'children',
+                 'sex_male', 'smoker_yes',
+                 'region_northwest', 'region_southeast', 'region_southwest']
 
-# User input form
-with st.form("prediction_form"):
-    age = st.number_input("Age", min_value=18, max_value=100, value=30)
-    sex = st.selectbox("Sex", ["male", "female"])
-    bmi = st.number_input("BMI", min_value=10.0, max_value=50.0, value=25.0)
-    children = st.slider("Number of Children", 0, 5, 1)
-    smoker = st.selectbox("Smoker", ["yes", "no"])
-    region = st.selectbox("Region", ["southeast", "southwest", "northeast", "northwest"])
+def preprocess_input(input_df):
+    # One-hot encode input
+    input_encoded = pd.get_dummies(input_df, columns=['sex', 'smoker', 'region'], drop_first=True, dtype=int)
 
-    submitted = st.form_submit_button("Predict")
+    # Ensure all expected columns are present
+    for col in expected_cols:
+        if col not in input_encoded.columns:
+            input_encoded[col] = 0  # Add missing col as 0
 
-# Preprocess input
-if submitted:
-    input_data = pd.DataFrame({
-        "age": [age],
-        "gender": [sex],
-        "bmi": [bmi],
-        "children": [children],
-        "smoker": [smoker],
-        "region": [region]
-    })
+    # Reorder columns
+    input_encoded = input_encoded[expected_cols]
+    return input_encoded
 
-    # If preprocessing is needed (e.g., one-hot encoding), include that here
-    # For this example, we assume the model pipeline handles preprocessing
+# Streamlit UI
+st.title("Medical Insurance Cost Predictor")
 
-    prediction = model.predict(input_data)
-    st.success(f"💰 Estimated Medical Charges: ${prediction[0]:,.2f}")
+age = st.number_input("Age", 18, 100)
+bmi = st.number_input("BMI", 10.0, 60.0)
+children = st.number_input("Number of Children", 0, 10)
+sex = st.selectbox("Sex", ["female", "male"])
+smoker = st.selectbox("Smoker", ["no", "yes"])
+region = st.selectbox("Region", ["northeast", "northwest", "southeast", "southwest"])
+
+if st.button("Predict"):
+    # Prepare input
+    input_dict = {
+        'age': [age],
+        'bmi': [bmi],
+        'children': [children],
+        'sex': [sex],
+        'smoker': [smoker],
+        'region': [region]
+    }
+    input_df = pd.DataFrame(input_dict)
+    input_processed = preprocess_input(input_df)
+
+    # Predict
+    prediction = model.predict(input_processed)[0]
+    st.success(f"Predicted Insurance Cost: ${prediction:,.2f}")
