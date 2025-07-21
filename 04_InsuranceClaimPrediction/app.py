@@ -4,10 +4,9 @@ import joblib
 import os
 import streamlit as st
 
-# Load model
-model_path = os.path.join("models", "model.pkl")
+# Safe path to model file
+model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
 model = joblib.load(model_path)
-
 # Expected columns (from training)
 expected_cols = ['age', 'bmi', 'children',
                  'sex_male', 'smoker_yes',
