@@ -59,8 +59,16 @@ input_df = pd.DataFrame(input_data)
 # Predict button
 if st.button("🚀 Predict"):
     prediction = model.predict(input_df)[0]
-    st.success(f"💰 Estimated Insurance Charges: **${prediction:,.2f}**")
+    threshold = 20000
+
+    st.subheader("💰 Estimated Insurance Charges:")
+    if prediction > threshold:
+        st.markdown(f"<h3 style='color:red;'>${prediction:,.2f}</h3>", unsafe_allow_html=True)
+        st.markdown("<span style='color:red;'>⚠️ High predicted charge!</span>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<h3 style='color:green;'>${prediction:,.2f}</h3>", unsafe_allow_html=True)
 
 # Optional footer
 st.markdown("---")
 st.markdown("© 2025 Ashna Imtiaz • Data Science Internship Project")
+
