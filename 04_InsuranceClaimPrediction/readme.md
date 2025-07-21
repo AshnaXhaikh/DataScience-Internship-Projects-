@@ -22,6 +22,8 @@ This problem helps insurance companies:
 - Improve customer segmentation
 
 ---
+## **view live app**
+[streamlit live demo](https://medicalcostinsurace.streamlit.app/)
 
 ### 🛠️ Approach
 
