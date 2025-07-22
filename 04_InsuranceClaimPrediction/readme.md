@@ -64,11 +64,9 @@ import joblib
 joblib.dump(final_model, 'lasso_poly_model.pkl')
 ```
 
-You can now finalize this model as your deployed solution.
-
 ---
 
-### 📌 Notes (Tailored to Your Questions)
+### 📌 Notes 
 
 1. **Why fit two times?**
    First fit: To find the best alpha using `LassoCV`.
