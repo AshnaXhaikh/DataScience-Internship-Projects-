@@ -3,7 +3,10 @@
 This is a **regression problem**, where the goal is to predict a **continuous numeric value** — the **medical insurance claim amount**.
 
 ---
+## **view my live app**
+[streamlit live demo](https://medicalcostinsurace.streamlit.app/)
 
+---
 ## 📘 Problem Statement
 
 “Given the information about a customer and an incident, **predict the expected medical insurance claim amount**.”
@@ -22,8 +25,6 @@ This problem helps insurance companies:
 - Improve customer segmentation
 
 ---
-## **view live app**
-[streamlit live demo](https://medicalcostinsurace.streamlit.app/)
 
 ### 🛠️ Approach
 
