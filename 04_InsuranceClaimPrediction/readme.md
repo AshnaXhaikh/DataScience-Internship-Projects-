@@ -3,8 +3,8 @@
 This is a **regression problem**, where the goal is to predict a **continuous numeric value** — the **medical insurance claim amount**.
 
 ---
-## **view my live app**
-[streamlit live demo](https://medicalcostinsurace.streamlit.app/)
+### **view my live app**
+>[streamlit live demo](https://medicalcostinsurace.streamlit.app/)
 
 ---
 ## 📘 Problem Statement
