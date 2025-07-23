@@ -2,10 +2,16 @@ import streamlit as st
 import joblib
 import numpy as np
 import pandas as pd
+import os
+
+# Define safe paths to model and threshold files
+BASE_DIR = os.path.dirname(__file__)
+pipeline_path = os.path.join(BASE_DIR, 'lgbm_pipeline.pkl')
+threshold_path = os.path.join(BASE_DIR, 'optimal_threshold.pkl')
 
 # Load model and threshold
-pipeline = joblib.load('lgbm_pipeline.pkl')
-best_threshold = joblib.load('optimal_threshold.pkl')
+pipeline = joblib.load(pipeline_path)
+best_threshold = joblib.load(threshold_path)
 
 # Mapping dictionaries for user-friendly display
 job_map = {
