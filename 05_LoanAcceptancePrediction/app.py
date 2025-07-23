@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-import pickle
-from utils.custom_transformers import categorize_pdays
+import joblib
 # Function for pdays_category (used in your notebook)
 def categorize_pdays(value):
     if value == -1:
@@ -11,12 +10,17 @@ def categorize_pdays(value):
     else:
         return 'old'
 
-# Load model and threshold
-with open('lgbm_pipeline.pkl', 'rb') as f:
-    pipeline = pickle.load(f)
+import os
+import joblib
 
-with open('optimal_threshold.pkl', 'rb') as f:
-    best_threshold = pickle.load(f)
+# Get absolute paths relative to the current file
+base_path = os.path.dirname(__file__)
+pipeline_path = os.path.join(base_path, 'lgbm_pipeline.pkl')
+threshold_path = os.path.join(base_path, 'optimal_threshold.pkl')
+
+# Load model and threshold using joblib
+pipeline = joblib.load(pipeline_path)
+best_threshold = joblib.load(threshold_path)
 
 
 st.title("Bank Term Deposit Prediction")
