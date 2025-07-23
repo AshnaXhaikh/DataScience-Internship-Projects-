@@ -16,8 +16,11 @@ from lightgbm import LGBMClassifier
 pipeline_path = os.path.join(os.path.dirname(__file__), 'lgbm_pipeline.pkl')
 threshold_path = os.path.join(os.path.dirname(__file__), 'optimal_threshold.pkl')
 
-pipeline = joblib.load(pipeline_path)
-best_threshold = joblib.load(threshold_path)
+try:
+    pipeline = joblib.load(pipeline_path)
+    best_threshold = joblib.load(threshold_path)
+except Exception as e:
+    st.error(f"Failed to load model or threshold: {e}")
 
 # ---------------------- UI Mapping ---------------------- #
 job_map = {
