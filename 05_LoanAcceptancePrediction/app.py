@@ -3,18 +3,14 @@ import joblib
 import numpy as np
 import pandas as pd
 import os
-import lightgbm
 
-from utils import categorize_pdays  # ✅ import from module
-from sklearn.preprocessing import FunctionTransformer
-        
 # Required for joblib to unpickle the model correctly
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from lightgbm import LGBMClassifier
 
-# Load model and threshold using safe paths
+# ---------------------- Load model and threshold ---------------------- #
 pipeline_path = os.path.join(os.path.dirname(__file__), 'lgbm_pipeline.pkl')
 threshold_path = os.path.join(os.path.dirname(__file__), 'optimal_threshold.pkl')
 
@@ -22,7 +18,8 @@ try:
     pipeline = joblib.load(pipeline_path)
     best_threshold = joblib.load(threshold_path)
 except Exception as e:
-    st.error(f"Failed to load model or threshold: {e}")
+    st.error(f"❌ Failed to load model or threshold: {e}")
+    st.stop()
 
 # ---------------------- UI Mapping ---------------------- #
 job_map = {
@@ -76,13 +73,16 @@ with st.form("prediction_form"):
     housing = st.selectbox("Has Housing Loan?", ['yes', 'no'])
     loan = st.selectbox("Has Personal Loan?", ['no', 'yes'])
     contact = st.selectbox("Contact Communication Type", ['cellular', 'telephone'])
-    month = st.selectbox("Last Contact Month", ['may', 'jun', 'jul', 'aug', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'sep'])
+    month = st.selectbox("Last Contact Month", [
+        'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+        'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+    ])
     poutcome = st.selectbox("Outcome of Previous Campaign", ['unknown', 'failure', 'other', 'success'])
-    pdays_category = st.selectbox("Previous Contact Timing", ['never', 'old', 'recent'])
+    pdays_category = st.selectbox("Previous Contact Timing", list(pdays_map.values()))
 
     submit = st.form_submit_button("Predict")
 
-# 👇 Place this outside the form, after user clicks Predict
+# ---------------------- Make Prediction ---------------------- #
 if submit:
     input_dict = {
         'age': [age],
@@ -90,22 +90,22 @@ if submit:
         'day': [day],
         'campaign': [campaign],
         'previous': [previous],
-        'job': [job_reverse[job]],  # convert display name back to model value
+        'job': [job_reverse[job]],
         'marital': [marital],
-        'education': [edu_reverse[education]],  # convert display name
+        'education': [edu_reverse[education]],
         'default': [default],
         'housing': [housing],
         'loan': [loan],
         'contact': [contact],
         'month': [month],
         'poutcome': [poutcome],
-        'pdays_category': [pdays_reverse[pdays_category]]  # convert display name
+        'pdays_category': [pdays_reverse[pdays_category]]
     }
 
     input_df = pd.DataFrame(input_dict)
 
     try:
-        proba = pipeline.predict_proba(input_df)[0][1]  # Get prob of class 1
+        proba = pipeline.predict_proba(input_df)[0][1]  # Get probability of positive class
         prediction = int(proba >= best_threshold)
 
         st.markdown(f"### 💡 Prediction: {'✅ Will Accept' if prediction else '❌ Will Not Accept'}")
