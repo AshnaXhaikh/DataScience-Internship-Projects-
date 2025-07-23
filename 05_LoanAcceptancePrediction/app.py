@@ -1,0 +1,89 @@
+import streamlit as st
+import joblib
+import numpy as np
+import pandas as pd
+
+# Load model and threshold
+pipeline = joblib.load('lgbm_pipeline.pkl')
+best_threshold = joblib.load('optimal_threshold.pkl')
+
+# Mapping dictionaries for user-friendly display
+job_map = {
+    'management': 'Management',
+    'technician': 'Technician',
+    'entrepreneur': 'Entrepreneur',
+    'blue-collar': 'Blue-Collar (manual worker)',
+    'unknown': 'Not Specified',
+    'retired': 'Retired',
+    'admin.': 'Admin',
+    'services': 'Services',
+    'self-employed': 'Self-Employed',
+    'unemployed': 'Unemployed',
+    'housemaid': 'Housemaid',
+    'student': 'Student'
+}
+
+education_map = {
+    'tertiary': 'University or Higher Education',
+    'secondary': 'High School',
+    'primary': 'Primary School',
+    'unknown': 'Not Specified'
+}
+
+pdays_map = {
+    'never': 'Never Contacted Before',
+    'old': 'Contacted Long Ago',
+    'recent': 'Recently Contacted'
+}
+
+# Reverse mapping to convert back to original
+job_reverse = {v: k for k, v in job_map.items()}
+edu_reverse = {v: k for k, v in education_map.items()}
+pdays_reverse = {v: k for k, v in pdays_map.items()}
+
+# UI
+st.title("Personal Loan Acceptance Prediction")
+
+age = st.number_input("Age", 18, 100)
+balance = st.number_input("Bank Balance", -10000, 100000)
+day = st.number_input("Day of Contact", 1, 31)
+campaign = st.number_input("Number of Contacts During Campaign", 1, 50)
+previous = st.number_input("Number of Contacts Before", 0, 50)
+
+job = st.selectbox("Job", list(job_map.values()))
+marital = st.selectbox("Marital Status", ['married', 'single', 'divorced'])
+education = st.selectbox("Education", list(education_map.values()))
+default = st.selectbox("Has Credit in Default?", ['no', 'yes'])
+housing = st.selectbox("Has Housing Loan?", ['yes', 'no'])
+loan = st.selectbox("Has Personal Loan?", ['no', 'yes'])
+contact = st.selectbox("Contact Communication Type", ['unknown', 'cellular', 'telephone'])
+month = st.selectbox("Last Contact Month", ['may', 'jun', 'jul', 'aug', 'oct', 'nov', 'dec', 'jan', 'feb','mar', 'apr', 'sep'])
+poutcome = st.selectbox("Outcome of Previous Campaign", ['unknown', 'failure', 'other', 'success'])
+pdays_category = st.selectbox("Contact Timing Category", list(pdays_map.values()))
+
+if st.button("Predict"):
+    # Prepare input
+    input_data = pd.DataFrame([{
+        'age': age,
+        'balance': balance,
+        'day': day,
+        'campaign': campaign,
+        'previous': previous,
+        'job': job_reverse[job],
+        'marital': marital,
+        'education': edu_reverse[education],
+        'default': default,
+        'housing': housing,
+        'loan': loan,
+        'contact': contact,
+        'month': month,
+        'poutcome': poutcome,
+        'pdays_category': pdays_reverse[pdays_category]
+    }])
+
+    # Predict
+    prob = pipeline.predict_proba(input_data)[0][1]
+    prediction = int(prob >= best_threshold)
+
+    st.write(f"Prediction Probability: {prob:.2f}")
+    st.success("✅ Likely to Accept Loan") if prediction == 1 else st.error("❌ Not Likely to Accept Loan")
