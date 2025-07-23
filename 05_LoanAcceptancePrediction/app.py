@@ -5,24 +5,29 @@ import pandas as pd
 import os
 import lightgbm
 
-# Essential sklearn imports for unpickling
+# Sklearn-related imports for joblib deserialization
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
-#  Import required model class used in the pipeline
-from lightgbm import LGBMClassifier  # Needed to unpickle correctly
+from lightgbm import LGBMClassifier  # Needed to deserialize correctly
 
+# --- Must be included to unpickle pipeline ---
+def categorize_pdays(value):
+    if value == -1:
+        return 'never'
+    elif value <= 100:
+        return 'recent'
+    else:
+        return 'old'
 
-# Define safe paths to model and threshold files
-
+# Load model and threshold using safe absolute paths
 pipeline_path = os.path.join(os.path.dirname(__file__), 'lgbm_pipeline.pkl')
 threshold_path = os.path.join(os.path.dirname(__file__), 'optimal_threshold.pkl')
 
-# Load model and threshold
 pipeline = joblib.load(pipeline_path)
 best_threshold = joblib.load(threshold_path)
 
-# Mapping dictionaries for user-friendly display
+# UI Mapping for readable values
 job_map = {
     'management': 'Management',
     'technician': 'Technician',
@@ -51,33 +56,37 @@ pdays_map = {
     'recent': 'Recently Contacted'
 }
 
-# Reverse mapping to convert back to original
+# Reverse for converting UI input back to model input
 job_reverse = {v: k for k, v in job_map.items()}
 edu_reverse = {v: k for k, v in education_map.items()}
 pdays_reverse = {v: k for k, v in pdays_map.items()}
 
-# UI
-st.title("Personal Loan Acceptance Prediction")
+# ---------------- STREAMLIT APP UI ---------------- #
+st.set_page_config(page_title="Loan Acceptance Predictor", layout="centered")
+st.title("📊 Personal Loan Acceptance Prediction")
 
-age = st.number_input("Age", 18, 100)
-balance = st.number_input("Bank Balance", -10000, 100000)
-day = st.number_input("Day of Contact", 1, 31)
-campaign = st.number_input("Number of Contacts During Campaign", 1, 50)
-previous = st.number_input("Number of Contacts Before", 0, 50)
+with st.form("prediction_form"):
+    age = st.number_input("Age", 18, 100)
+    balance = st.number_input("Bank Balance", -10000, 100000)
+    day = st.number_input("Day of Contact", 1, 31)
+    campaign = st.number_input("Number of Contacts During Campaign", 1, 50)
+    previous = st.number_input("Number of Contacts Before", 0, 50)
 
-job = st.selectbox("Job", list(job_map.values()))
-marital = st.selectbox("Marital Status", ['married', 'single', 'divorced'])
-education = st.selectbox("Education", list(education_map.values()))
-default = st.selectbox("Has Credit in Default?", ['no', 'yes'])
-housing = st.selectbox("Has Housing Loan?", ['yes', 'no'])
-loan = st.selectbox("Has Personal Loan?", ['no', 'yes'])
-contact = st.selectbox("Contact Communication Type", ['unknown', 'cellular', 'telephone'])
-month = st.selectbox("Last Contact Month", ['may', 'jun', 'jul', 'aug', 'oct', 'nov', 'dec', 'jan', 'feb','mar', 'apr', 'sep'])
-poutcome = st.selectbox("Outcome of Previous Campaign", ['unknown', 'failure', 'other', 'success'])
-pdays_category = st.selectbox("Contact Timing Category", list(pdays_map.values()))
+    job = st.selectbox("Job", list(job_map.values()))
+    marital = st.selectbox("Marital Status", ['married', 'single', 'divorced'])
+    education = st.selectbox("Education", list(education_map.values()))
+    default = st.selectbox("Has Credit in Default?", ['no', 'yes'])
+    housing = st.selectbox("Has Housing Loan?", ['yes', 'no'])
+    loan = st.selectbox("Has Personal Loan?", ['no', 'yes'])
+    contact = st.selectbox("Contact Communication Type", ['unknown', 'cellular', 'telephone'])
+    month = st.selectbox("Last Contact Month", ['may', 'jun', 'jul', 'aug', 'oct', 'nov', 'dec', 'jan', 'feb','mar', 'apr', 'sep'])
+    poutcome = st.selectbox("Outcome of Previous Campaign", ['unknown', 'failure', 'other', 'success'])
+    pdays_category = st.selectbox("Contact Timing Category", list(pdays_map.values()))
 
-if st.button("Predict"):
-    # Prepare input
+    submit = st.form_submit_button("Predict")
+
+if submit:
+    # Prepare input for prediction
     input_data = pd.DataFrame([{
         'age': age,
         'balance': balance,
@@ -96,9 +105,12 @@ if st.button("Predict"):
         'pdays_category': pdays_reverse[pdays_category]
     }])
 
-    # Predict
-    prob = pipeline.predict_proba(input_data)[0][1]
-    prediction = int(prob >= best_threshold)
+    # Run prediction
+    probability = pipeline.predict_proba(input_data)[0][1]
+    prediction = int(probability >= best_threshold)
 
-    st.write(f"Prediction Probability: {prob:.2f}")
-    st.success("✅ Likely to Accept Loan") if prediction == 1 else st.error("❌ Not Likely to Accept Loan")
+    st.write(f"🔍 **Prediction Probability**: `{probability:.2f}`")
+    if prediction == 1:
+        st.success("✅ Likely to Accept Loan")
+    else:
+        st.error("❌ Not Likely to Accept Loan")
