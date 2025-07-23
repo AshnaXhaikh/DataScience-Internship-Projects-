@@ -1,5 +1,3 @@
-# utils.py
-
 def categorize_pdays(value):
     if value == -1:
         return 'never'
