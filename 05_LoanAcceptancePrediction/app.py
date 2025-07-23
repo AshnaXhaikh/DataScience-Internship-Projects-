@@ -6,19 +6,12 @@ import os
 import lightgbm
 
 # Sklearn-related imports for joblib deserialization
+from utils.custom_transformers import categorize_pdays
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from lightgbm import LGBMClassifier  # Needed to deserialize correctly
 
-# --- Must be included to unpickle pipeline ---
-def categorize_pdays(value):
-    if value == -1:
-        return 'never'
-    elif value <= 100:
-        return 'recent'
-    else:
-        return 'old'
 
 # Load model and threshold using safe absolute paths
 pipeline_path = os.path.join(os.path.dirname(__file__), 'lgbm_pipeline.pkl')
