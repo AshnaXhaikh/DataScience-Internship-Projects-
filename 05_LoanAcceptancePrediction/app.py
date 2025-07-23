@@ -73,4 +73,6 @@ with st.form("prediction_form"):
     default = st.selectbox("Has Credit in Default?", ['no', 'yes'])
     housing = st.selectbox("Has Housing Loan?", ['yes', 'no'])
     loan = st.selectbox("Has Personal Loan?", ['no', 'yes'])
-    contact = st.select
+    contact = st.selectbox("Contact Communication Type", ['cellular', 'telephone'])  # ✅ completed properly
+
+    submit = st.form_submit_button("Predict")  # ✅ inside the form
