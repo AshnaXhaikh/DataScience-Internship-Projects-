@@ -1,12 +1,9 @@
-from sklearn.base import BaseEstimator, TransformerMixin
+# utils.py
 
-class categorize_pdays(BaseEstimator, TransformerMixin):
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        return X.apply(lambda val: (
-            'never' if val == 999 else
-            'recent' if val <= 5 else
-            'old'
-        ))
+def categorize_pdays(value):
+    if value == -1:
+        return 'never'
+    elif value <= 100:
+        return 'recent'
+    else:
+        return 'old'
