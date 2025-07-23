@@ -3,9 +3,16 @@ import joblib
 import numpy as np
 import pandas as pd
 import os
+import lightgbm
 
+# Essential sklearn imports for unpickling
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
 #  Import required model class used in the pipeline
 from lightgbm import LGBMClassifier  # Needed to unpickle correctly
+
+
 # Define safe paths to model and threshold files
 
 pipeline_path = os.path.join(os.path.dirname(__file__), 'lgbm_pipeline.pkl')
