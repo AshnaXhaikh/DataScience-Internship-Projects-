@@ -5,22 +5,21 @@ import pandas as pd
 import os
 import lightgbm
 
-# Sklearn-related imports for joblib deserialization
+# Required for joblib to unpickle the model correctly
 from utils.custom_transformers import categorize_pdays
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
-from lightgbm import LGBMClassifier  # Needed to deserialize correctly
+from lightgbm import LGBMClassifier
 
-
-# Load model and threshold using safe absolute paths
+# Load model and threshold using safe paths
 pipeline_path = os.path.join(os.path.dirname(__file__), 'lgbm_pipeline.pkl')
 threshold_path = os.path.join(os.path.dirname(__file__), 'optimal_threshold.pkl')
 
 pipeline = joblib.load(pipeline_path)
 best_threshold = joblib.load(threshold_path)
 
-# UI Mapping for readable values
+# ---------------------- UI Mapping ---------------------- #
 job_map = {
     'management': 'Management',
     'technician': 'Technician',
@@ -49,12 +48,12 @@ pdays_map = {
     'recent': 'Recently Contacted'
 }
 
-# Reverse for converting UI input back to model input
+# Reverse mapping for input conversion
 job_reverse = {v: k for k, v in job_map.items()}
 edu_reverse = {v: k for k, v in education_map.items()}
 pdays_reverse = {v: k for k, v in pdays_map.items()}
 
-# ---------------- STREAMLIT APP UI ---------------- #
+# ---------------------- STREAMLIT UI ---------------------- #
 st.set_page_config(page_title="Loan Acceptance Predictor", layout="centered")
 st.title("📊 Personal Loan Acceptance Prediction")
 
@@ -71,39 +70,4 @@ with st.form("prediction_form"):
     default = st.selectbox("Has Credit in Default?", ['no', 'yes'])
     housing = st.selectbox("Has Housing Loan?", ['yes', 'no'])
     loan = st.selectbox("Has Personal Loan?", ['no', 'yes'])
-    contact = st.selectbox("Contact Communication Type", ['unknown', 'cellular', 'telephone'])
-    month = st.selectbox("Last Contact Month", ['may', 'jun', 'jul', 'aug', 'oct', 'nov', 'dec', 'jan', 'feb','mar', 'apr', 'sep'])
-    poutcome = st.selectbox("Outcome of Previous Campaign", ['unknown', 'failure', 'other', 'success'])
-    pdays_category = st.selectbox("Contact Timing Category", list(pdays_map.values()))
-
-    submit = st.form_submit_button("Predict")
-
-if submit:
-    # Prepare input for prediction
-    input_data = pd.DataFrame([{
-        'age': age,
-        'balance': balance,
-        'day': day,
-        'campaign': campaign,
-        'previous': previous,
-        'job': job_reverse[job],
-        'marital': marital,
-        'education': edu_reverse[education],
-        'default': default,
-        'housing': housing,
-        'loan': loan,
-        'contact': contact,
-        'month': month,
-        'poutcome': poutcome,
-        'pdays_category': pdays_reverse[pdays_category]
-    }])
-
-    # Run prediction
-    probability = pipeline.predict_proba(input_data)[0][1]
-    prediction = int(probability >= best_threshold)
-
-    st.write(f"🔍 **Prediction Probability**: `{probability:.2f}`")
-    if prediction == 1:
-        st.success("✅ Likely to Accept Loan")
-    else:
-        st.error("❌ Not Likely to Accept Loan")
+    contact = st.select
