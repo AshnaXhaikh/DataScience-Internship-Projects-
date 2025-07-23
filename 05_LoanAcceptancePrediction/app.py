@@ -73,6 +73,40 @@ with st.form("prediction_form"):
     default = st.selectbox("Has Credit in Default?", ['no', 'yes'])
     housing = st.selectbox("Has Housing Loan?", ['yes', 'no'])
     loan = st.selectbox("Has Personal Loan?", ['no', 'yes'])
-    contact = st.selectbox("Contact Communication Type", ['cellular', 'telephone'])  # ✅ completed properly
+    contact = st.selectbox("Contact Communication Type", ['cellular', 'telephone'])
+    month = st.selectbox("Last Contact Month", ['may', 'jun', 'jul', 'aug', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'sep'])
+    poutcome = st.selectbox("Outcome of Previous Campaign", ['unknown', 'failure', 'other', 'success'])
+    pdays_category = st.selectbox("Previous Contact Timing", ['never', 'old', 'recent'])
 
-    submit = st.form_submit_button("Predict")  # ✅ inside the form
+    submit = st.form_submit_button("Predict")
+
+# 👇 Place this outside the form, after user clicks Predict
+if submit:
+    input_dict = {
+        'age': [age],
+        'balance': [balance],
+        'day': [day],
+        'campaign': [campaign],
+        'previous': [previous],
+        'job': [job_reverse[job]],  # convert display name back to model value
+        'marital': [marital],
+        'education': [edu_reverse[education]],  # convert display name
+        'default': [default],
+        'housing': [housing],
+        'loan': [loan],
+        'contact': [contact],
+        'month': [month],
+        'poutcome': [poutcome],
+        'pdays_category': [pdays_reverse[pdays_category]]  # convert display name
+    }
+
+    input_df = pd.DataFrame(input_dict)
+
+    try:
+        proba = pipeline.predict_proba(input_df)[0][1]  # Get prob of class 1
+        prediction = int(proba >= best_threshold)
+
+        st.markdown(f"### 💡 Prediction: {'✅ Will Accept' if prediction else '❌ Will Not Accept'}")
+        st.markdown(f"**Probability of Acceptance:** {proba:.2f}")
+    except Exception as e:
+        st.error(f"❌ Prediction failed: {e}")
