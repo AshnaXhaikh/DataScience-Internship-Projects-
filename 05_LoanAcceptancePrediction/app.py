@@ -4,7 +4,7 @@ import pickle
 
 # -------------------- Load model and threshold --------------------
 try:
-    with open("pipeline.pkl", "rb") as file:
+    with open("lgbm_pipeline.pkl", "rb") as file:
         pipeline = pickle.load(file)
     with open("best_threshold.pkl", "rb") as file:
         best_threshold = pickle.load(file)
