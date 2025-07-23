@@ -5,9 +5,9 @@ import pandas as pd
 import os
 
 # Define safe paths to model and threshold files
-BASE_DIR = os.path.dirname(__file__)
-pipeline_path = os.path.join(BASE_DIR, 'lgbm_pipeline.pkl')
-threshold_path = os.path.join(BASE_DIR, 'optimal_threshold.pkl')
+
+pipeline_path = os.path.join(os.path.dirname(__file__), 'lgbm_pipeline.pkl')
+threshold_path = os.path.join(os.path.dirname(__file__), 'optimal_threshold.pkl')
 
 # Load model and threshold
 pipeline = joblib.load(pipeline_path)
