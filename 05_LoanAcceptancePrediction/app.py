@@ -5,16 +5,8 @@ import pandas as pd
 import os
 import lightgbm
 
+from utils import categorize_pdays  # ✅ import from module
 from sklearn.preprocessing import FunctionTransformer
-
-# Define the same function used during training
-def categorize_pdays(value):
-    if value == -1:
-        return 'never'
-    elif value <= 100:
-        return 'recent'
-    else:
-        return 'old'
         
 # Required for joblib to unpickle the model correctly
 from sklearn.pipeline import Pipeline
