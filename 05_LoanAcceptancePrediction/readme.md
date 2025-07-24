@@ -10,7 +10,7 @@
 - Extract actionable business insights
 
 ---
-
+### live demo app: [click here](https://huggingface.co/spaces/ashnaxhaikh/LoanAcceptancePredictor)
 ## 📊 **Bank Marketing Dataset (UCI Repository)**
 
 ### 📝 **Description**
