@@ -13,14 +13,10 @@ def categorize_pdays(value):
 import os
 import joblib
 
-# Get absolute paths relative to the current file
-base_path = os.path.dirname(__file__)
-pipeline_path = os.path.join(base_path, 'lgbm_pipeline.pkl')
-threshold_path = os.path.join(base_path, 'optimal_threshold.pkl')
 
 # Load model and threshold using joblib
-pipeline = joblib.load(pipeline_path)
-best_threshold = joblib.load(threshold_path)
+pipeline = joblib.load('lgbm_pipeline.pkl')
+best_threshold = joblib.load('optimal_threshold.pkl')
 
 
 st.title("Bank Term Deposit Prediction")
