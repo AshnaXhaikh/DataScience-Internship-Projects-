@@ -1,6 +1,8 @@
 import streamlit as st
+import sklearn
 import pandas as pd
 import joblib
+import os
 # Function for pdays_category (used in your notebook)
 def categorize_pdays(value):
     if value == -1:
@@ -9,9 +11,6 @@ def categorize_pdays(value):
         return 'recent'
     else:
         return 'old'
-
-import os
-import joblib
 
 
 # Load model and threshold using joblib
