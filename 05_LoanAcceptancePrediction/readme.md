@@ -10,7 +10,8 @@
 - Extract actionable business insights
 
 ---
-### live demo app:[![Streamlit](https://img.shields.io/badge/Streamlit-App-red?style=for-the-badge&logo=streamlit)](https://huggingface.co/spaces/ashnaxhaikh/LoanAcceptancePredictor)
+### live demo app:
+[![Streamlit](https://img.shields.io/badge/Streamlit-App-red?style=for-the-badge&logo=streamlit)](https://huggingface.co/spaces/ashnaxhaikh/LoanAcceptancePredictor)
 
 ---
 ### 📘[Project Documentation](https://www.pi.inc/docs/339553768737853?share_token=IUFAYZCS46GAU)
