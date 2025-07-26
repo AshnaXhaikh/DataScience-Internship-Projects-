@@ -25,6 +25,9 @@ This problem helps insurance companies:
 - Improve customer segmentation
 
 ---
+### [Project Documentation](https://www.pi.inc/docs/338192855837953?share_token=GRWFWZA5BUDAU) 
+
+---
 
 ### 🛠️ Approach
 
