@@ -4,13 +4,10 @@ import pickle
 
 import os
 
+import joblib
 
-# Get the absolute path to the current directory
-current_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(current_dir, "decision_tree_pipeline.pkl")
-
-with open(model_path, 'rb') as f:
-    model = pickle.load(f)
+# ─── Load Model and Threshold ───────────────────────────────────────────────
+pipeline = joblib.load('decision_tree_pipeline.pkl')
 
 
 # Define page names
