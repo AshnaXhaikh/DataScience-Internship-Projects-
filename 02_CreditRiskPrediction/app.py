@@ -39,9 +39,9 @@ feature_names = [
 if page == "Client Details":
     st.header("Client Inputs – Demographic Info")
 
-    st.session_state.client_inputs['Upfront_charges'] = st.number_input("Upfront Charges (₹)", min_value=0.0, step=100.0)
-    st.session_state.client_inputs['property_value'] = st.number_input("Property Value (₹)", min_value=0.0, step=1000.0)
-    st.session_state.client_inputs['income'] = st.number_input("Monthly Income (₹)", min_value=0.0, step=500.0)
+    st.session_state.client_inputs['Upfront_charges'] = st.number_input("Upfront Charges (USD)", min_value=0.0, step=100.0)
+    st.session_state.client_inputs['property_value'] = st.number_input("Property Value (USD)", min_value=0.0, step=1000.0)
+    st.session_state.client_inputs['income'] = st.number_input("Monthly Income (USD)", min_value=0.0, step=500.0)
     st.session_state.client_inputs['dtir1'] = st.number_input("Debt-to-Income Ratio (%)", min_value=0.0, step=1.0)
 
     gender = st.selectbox("Gender", ["Male", "Female", "Joint Account", "Undisclosed"])
