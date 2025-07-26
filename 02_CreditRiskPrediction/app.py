@@ -2,9 +2,16 @@ import streamlit as st
 import numpy as np
 import pickle
 
-# Load trained pipeline
-with open('decision_tree_pipeline.pkl', 'rb') as f:
-    pipeline = pickle.load(f)
+import os
+
+
+# Get the absolute path to the current directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, "decision_tree_pipeline.pkl")
+
+with open(model_path, 'rb') as f:
+    model = pickle.load(f)
+
 
 # Define page names
 pages = ["Client Details", "Management Details", "Prediction"]
