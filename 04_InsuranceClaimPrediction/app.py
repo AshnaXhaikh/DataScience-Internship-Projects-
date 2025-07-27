@@ -20,11 +20,11 @@ Fill in the details below and click **Predict** to get the result.
 # Sidebar
 st.sidebar.header("ℹ️ About")
 st.sidebar.markdown("""
-This project was part of a data science internship.  
-I used feature engineering, encoding, and regularized regression to build the model.
-
 **Tech Stack:** Python, Scikit-learn, Streamlit  
 **Created by:** Ashna Imtiaz
+st.markdown("### 📘 Project Docs")
+if st.button("Open Project Documentation"):
+    st.markdown("[Click here to view the full documentation](https://www.pi.inc/docs/338192855837953?share_token=GRWFWZA5BUDAU)", unsafe_allow_html=True)
 """)
 
 # Input form
