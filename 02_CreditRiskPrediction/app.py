@@ -1,97 +1,68 @@
 import streamlit as st
+import pandas as pd
 import numpy as np
-import os
 import joblib
 
-# ─── Load Model ──────────────────────────────────────────────────────────────
+# Load preprocessed model assets
 @st.cache_resource
 def load_model():
-    model_path = os.path.join(os.path.dirname(__file__), 'decision_tree_pipeline.pkl')
-    if not os.path.exists(model_path):
-        st.error("Model file not found. Please upload decision_tree_pipeline.pkl.")
-        return None
-    return joblib.load(model_path)
+    model = joblib.load("rf_model.pkl")
+    encoder_ohe = joblib.load("encoder_ohe.pkl")
+    encoder_age = joblib.load("encoder_age.pkl")
+    return model, encoder_ohe, encoder_age
 
-pipeline = load_model()
+model, encoder_ohe, encoder_age = load_model()
 
-# ─── Define Pages ────────────────────────────────────────────────────────────
-pages = ["Client Details", "Management Details", "Prediction"]
-page = st.sidebar.selectbox("Choose Page", pages)
+# Title
+st.set_page_config(page_title="Credit Default Predictor", layout="centered")
+st.title("🏦 Credit Risk Prediction")
+st.markdown("Enter applicant data below to assess default risk.")
 
-# ─── Maintain State ──────────────────────────────────────────────────────────
-if "client_inputs" not in st.session_state:
-    st.session_state.client_inputs = {}
+# User Inputs
+age = st.selectbox("Age Group", ['<25', '25-34', '35-44', '45-54', '55-64', '65-74', '>74'])
+income = st.number_input("Monthly Income", min_value=0, value=5000)
+dtir1 = st.slider("Debt-to-Income Ratio", 0.0, 100.0, 35.0)
+loan_amount = st.number_input("Loan Amount", min_value=1000, value=150000)
+rate_of_interest = st.number_input("Interest Rate (%)", min_value=0.0, value=4.0)
+LTV = st.slider("Loan-to-Value Ratio", 0.0, 100.0, 75.0)
+term = st.number_input("Loan Term (months)", min_value=1, value=360)
 
-if "management_inputs" not in st.session_state:
-    st.session_state.management_inputs = {}
+loan_type = st.selectbox("Loan Type", ['type1', 'type2', 'type3'])
+loan_purpose = st.selectbox("Loan Purpose", ['p1', 'p2', 'p3', 'p4'])
+credit_worthiness = st.selectbox("Credit Worthiness", ['l1', 'l2'])
 
-# ─── Feature Names ───────────────────────────────────────────────────────────
-feature_names = [
-    'Upfront_charges', 'property_value', 'income', 'dtir1',
-    'Gender_Joint', 'Gender_Sex Not Available', 'loan_type_type2',
-    'business_or_commercial_nob/c', 'Neg_ammortization_not_neg',
-    'lump_sum_payment_not_lpsm', 'credit_type_CRIF', 'credit_type_EQUI',
-    'credit_type_EXP', 'co-applicant_credit_type_EXP',
-    'submission_of_application_to_inst'
-]
+# Format inputs for model
+def preprocess_input():
+    input_data = pd.DataFrame({
+        'income': [income],
+        'dtir1': [dtir1],
+        'loan_amount': [loan_amount],
+        'rate_of_interest': [rate_of_interest],
+        'LTV': [LTV],
+        'term': [term],
+        'age': [age],
+        'loan_type': [loan_type],
+        'loan_purpose': [loan_purpose],
+        'Credit_Worthiness': [credit_worthiness]
+    })
 
-# ─── CLIENT DETAILS PAGE ─────────────────────────────────────────────────────
-if page == "Client Details":
-    st.header("Client Inputs – Demographic Info")
+    # One-hot encode nominal fields
+    encoded_nom = encoder_ohe.transform(input_data[['loan_type', 'Credit_Worthiness', 'loan_purpose']])
+    encoded_nom_df = pd.DataFrame(encoded_nom, columns=encoder_ohe.get_feature_names_out(), index=input_data.index)
 
-    st.session_state.client_inputs['Upfront_charges'] = st.number_input("Upfront Charges (USD)", min_value=0.0, step=100.0)
-    st.session_state.client_inputs['property_value'] = st.number_input("Property Value (USD)", min_value=0.0, step=1000.0)
-    st.session_state.client_inputs['income'] = st.number_input("Monthly Income (USD)", min_value=0.0, step=500.0)
-    st.session_state.client_inputs['dtir1'] = st.number_input("Debt-to-Income Ratio (%)", min_value=0.0, step=1.0)
+    # Ordinal encode age
+    input_data['age'] = encoder_age.transform(input_data[['age']])
+    
+    # Combine
+    final_input = pd.concat([input_data.drop(columns=['loan_type', 'Credit_Worthiness', 'loan_purpose']), encoded_nom_df], axis=1)
+    return final_input
 
-    gender = st.selectbox("Gender", ["Male", "Female", "Joint Account", "Undisclosed"])
-    st.session_state.client_inputs['Gender_Joint'] = 1 if gender == "Joint Account" else 0
-    st.session_state.client_inputs['Gender_Sex Not Available'] = 1 if gender == "Undisclosed" else 0
+if st.button("🔍 Predict Default Risk"):
+    input_for_model = preprocess_input()
+    prediction = model.predict(input_for_model)[0]
+    proba = model.predict_proba(input_for_model)[0][1]
 
-# ─── MANAGEMENT DETAILS PAGE ─────────────────────────────────────────────────
-elif page == "Management Details":
-    st.header("Internal Inputs – By Loan Manager")
-
-    loan_type = st.selectbox("Loan Type", ["Type 1", "Type 2"])
-    st.session_state.management_inputs['loan_type_type2'] = 1 if loan_type == "Type 2" else 0
-
-    business = st.selectbox("Business/Commercial Category", ["Business/Commercial", "Non Business/Commercial"])
-    st.session_state.management_inputs['business_or_commercial_nob/c'] = 1 if business == "Non Business/Commercial" else 0
-
-    neg_amort = st.selectbox("Negative Amortization Option", ["Enabled", "Disabled"])
-    st.session_state.management_inputs['Neg_ammortization_not_neg'] = 1 if neg_amort == "Disabled" else 0
-
-    lump_sum = st.selectbox("Lump Sum Payment Option", ["Enabled", "Disabled"])
-    st.session_state.management_inputs['lump_sum_payment_not_lpsm'] = 1 if lump_sum == "Disabled" else 0
-
-    credit_types = st.multiselect("Reported Credit Bureaus", ["CRIF", "EQUIFAX", "EXPERIAN"])
-    for bureau in ["CRIF", "EQUI", "EXP"]:
-        label = f"credit_type_{bureau}"
-        st.session_state.management_inputs[label] = 1 if bureau in credit_types else 0
-
-    co_credit = st.selectbox("Co-applicant Credit Report From", ["EXPERIAN", "Other"])
-    st.session_state.management_inputs['co-applicant_credit_type_EXP'] = 1 if co_credit == "EXPERIAN" else 0
-
-    submission = st.selectbox("Submission Type", ["Submitted to Institution", "Other"])
-    st.session_state.management_inputs['submission_of_application_to_inst'] = 1 if submission == "Submitted to Institution" else 0
-
-# ─── PREDICTION PAGE ────────────────────────────────────────────────────────
-elif page == "Prediction":
-    st.header("📊 Predict Credit Default Risk")
-
-    if st.button("Run Prediction"):
-        if pipeline is None:
-            st.error("Model is not loaded. Check file path or upload the model.")
-        else:
-            # Combine inputs
-            inputs = {**st.session_state.client_inputs, **st.session_state.management_inputs}
-            full_input = [inputs.get(feat, 0) for feat in feature_names]
-
-            prediction = pipeline.predict([full_input])[0]
-            probability = pipeline.predict_proba([full_input])[0][1]  # Default class prob
-
-            st.subheader("🔎 Prediction Result")
-            if prediction == 1:
-                st.error(f"❌ High Risk of Default (Probability: {probability:.2f})")
-            else:
-                st.success(f"✅ Low Risk of Default (Probability: {probability:.2f})")
+    if prediction == 1:
+        st.error(f"⚠️ High Risk of Default. Probability: {proba:.2%}")
+    else:
+        st.success(f"✅ Low Risk of Default. Probability: {proba:.2%}")
